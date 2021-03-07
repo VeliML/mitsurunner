@@ -118,7 +118,13 @@ sensor:
 # This C++ code checks if all requirements are fullfilled to trigger defrosting and triggers it then.
     lambda: !lambda |-
         float temperature_delta = (id(outdoor_temp).state - id(heat_exchanger_temp).state);
-
+        bool isDefrostingOngoing = false;
+        
+        // if heat exchanger is warmer than outdoor temperature, then defrost is surely ongoing
+        if ( temperature_delta <= 0 ){        
+            isDefrostingOngoing = true;
+        }
+            
         id(mqtt_client).publish(id(G_TOPIC_STATE), to_string(id(G_state)));
 
         switch(id(G_state)) {
@@ -128,7 +134,7 @@ sensor:
                 // Wait first that sensors has read some values.
                 if (G_state_time_passed) {
                     // If defrosting is going on
-                    if (temperature_delta <= 0.0) {
+                    if (isDefrostingOngoing) {
                         id(enter_DefrostingStarted).execute();
                     }
                     else {
@@ -146,6 +152,10 @@ sensor:
                 else if (temperature_delta >= TEMPERATURE_DELTA_TO_DEFROST) {
                     id(enter_TempExceeded).execute();
                 }
+                // Reset state machine if defrosting is ongoing in this state
+                else if (isDefrostingOngoing) {
+                    id(enter_Reset).execute();
+                }
                 break;
 
             case ST_TEMP_EXCEEDED:
@@ -156,6 +166,10 @@ sensor:
                 else if (temperature_delta < TEMPERATURE_DELTA_TO_DEFROST) {
                     id(enter_Idle).execute();
                 }
+                // Reset state machine if defrosting is ongoing in this state
+                else if (isDefrostingOngoing) {
+                    id(enter_Reset).execute();
+                }
                 break;
 
             case ST_START_DEFROSTING:
@@ -164,7 +178,7 @@ sensor:
                     id(enter_Idle).execute();
                 }
                 // Check that defrosting is really started.
-                else if (temperature_delta < 0.0) {
+                else if (isDefrostingOngoing) {
                     id(enter_DefrostingStarted).execute();
                 }
                 break;
@@ -185,7 +199,11 @@ sensor:
                 // or the upper temperature limit is exceeded, start defrosting directly.
                 else if (id(G_max_heating_time_passed)) {
                     id(enter_StartDefrosting).execute();
-                } 
+                }               
+                // Reset state machine if defrosting is ongoing in this state
+                else if (isDefrostingOngoing) {
+                    id(enter_Reset).execute();
+                }
 
                 break;
 
@@ -213,7 +231,12 @@ script:
     then:
     - switch.turn_off: gpio_relay
     - lambda: !lambda |-
-        id(G_previous_state) = id(G_state);
+        id(G_previous_state) = id(G_state);        
+        
+        id(start_state_timer).stop(); // Ok to call even not running        
+        id(G_timer_action) = to_string(TMR_NOT_PASSED);
+        id(report_timer_status).execute();  
+
         id(G_state) = ST_RESET;
         id(G_state_timer) = RESET_SENSOR_DELAY * 1000; //seconds
     - script.execute: start_state_timer
@@ -259,6 +282,7 @@ script:
     mode: single
     then:
     - switch.turn_off: gpio_relay
+    - script.execute: schedule_forced_defrosting
     - lambda: !lambda |-
         id(G_previous_state) = id(G_state);
         id(G_state) = ST_DEFROSTING_STARTED;
