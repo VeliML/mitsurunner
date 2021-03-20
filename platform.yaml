@@ -1,20 +1,21 @@
-# Update your wifi details to section below
+# SETTINGS: Your wifi details 
 wifi:
   ssid: "xxxxx"
   password: "xxxxxxxx"
 # Set manual IP address so that wireless "OTA" update will work more reliably
-# Check these number from your wifi network
+# Check these numbers from your wifi network/router (often found in DHCP settings)
   manual_ip:
     static_ip: 192.168.1.100
     subnet: 255.255.255.0
     gateway: 192.168.1.0
 
-# enables firmware updates over wifi
-# set your unique password to prevent hackers to modify your device
+# Enables firmware updates over wifi
+# Set your unique password to prevent hackers to modify your device
 ota:
   password: "password"
 
 # MQTT broker configuration
+# Set broker ip address to match 
 mqtt:
   broker: 192.168.1.xxx 
   id: mqtt_client
@@ -24,29 +25,29 @@ mqtt:
 #mqtt message prefix, change this to what you want
   topic_prefix: msz_ln/temperature
 
-# In case of you are using IoT Guru (iotguru.io), uncomment and use data below.
-# You have to check correct values from your IoT Guru web service
-# broker: 195.201.219.208
+# In case of you use IoT Guru ( https://iotguru.cloud ), uncomment and use data below.
+# Check correct values from your IoT Guru account
+# broker: mqtt.iotguru.cloud
 # username: user short identifier
 # client_id: device short identifier
 # password: device key
 
-# enable logging to terminal - you can get log messages over wifi
+# Enable logging to terminal. You can read log messages over wifi
 logger:
 
 substitutions:
-# define these values according to your hardware see: https://esphome.io/index.html
+# Define these values according to your hardware see: https://esphome.io
   platform_type:        'esp8266'
   board_type:           'd1_mini'
 
-# addresses for your dallas DS18B20 temperature sensors - you need to update these
+# Addresses for your Dallas DS18B20 temperature sensors - you need to update these
   dallas_address_heat_exchanger_temp: '0x653C01D607697928'
-  dallas_address_outdoor_temp:         '0x93000802B67D1E10'
+  dallas_address_outdoor_temp:        '0x93000802B67D1E10'
 
 # MQTT topics. These are inside single quotes:
-# in case of IoT Guru, replace these parts with your own values: uuu = user_id, ccc = client_id, nnn = node_short_identifier
-# you can browse to the Help tab of a Field page in iotguru.live and copy/paste the line under 'GENERIC MQTT TOPIC'
-# it should look like: "pub/qwertyuiop/asdfghjkl/zxcvbnm/temperature_delta"
+# If you use IoT Guru: Replace with your own values: uuu = user_id, ccc = client_id, nnn = node_short_identifier.
+# In IoT Guru see Field > Help and copy/paste the line under 'GENERIC MQTT TOPIC'
+# It should look like: "pub/qwertyuiop/asdfghjkl/zxcvbnm/temperature_delta"
   topic_heatexchanger:      'pub/uuu/ccc/nnn/heatex_temperature'
   topic_outdoor:            'pub/uuu/ccc/nnn/outdoor_temperature'
   topic_delta:              'pub/uuu/ccc/nnn/temperature_delta'
@@ -63,5 +64,5 @@ substitutions:
   topic_error:                          '"pub/uuu/ccc/nnn/error"'
 
 # IO-pins:
-  dallas_pin: 'D7' # pin for DS18B20 1-wire temperature sensors, set to the pin number you are using
-  relay_pin:  'D0' # pin for controlling relay
+  dallas_pin: 'D7' # Pin for DS18B20 1-wire temperature sensors. Set to the pin number you are using.
+  relay_pin:  'D0' # Pin for controlling relay
