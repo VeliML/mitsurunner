@@ -1,6 +1,6 @@
 <<: !include platform.yaml
 
-# initialize and define mitsurunner
+# initialize and define Mitsurunner
 esphome:
   name: mitsurunner
   platform: $platform_type
@@ -68,8 +68,7 @@ globals:
     initial_value: $topic_outdoor_raw
 
 
-# dallas DS28B20 sensor
-# device measures temperature in 10 seconds interval
+# Temperature sensor (Dallas DS18B20) and its update/measurement interval
 dallas:
   - pin: $dallas_pin
     update_interval: 5s
@@ -84,12 +83,12 @@ switch:
     name: "Defrost prevention control"
     id: gpio_relay
 
-# Dallas DS18B20 temperature sensor details. 
-# you need to check IDs of temperature sensors by starting this SW and checking those from logs printing to terminal. 
-# After checked, copy IDs to platform.yaml file and heat another sensor. Check which sensor it were and use it for the appropriate topic
+# Temperature sensor (Dallas DS18B20) details. 
+# You need to check temperature sensors IDs by starting this software and checking IDs from log printing to terminal. 
+# Copy IDs from terminal log to platform.yaml file and heat one sensor. Then check which sensor it was and use it for the corresponding topic
 sensor:
   - platform: dallas
-    address: $dallas_address_heat_exchanger_temp # Please remember to define this on platform.yaml
+    address: $dallas_address_heat_exchanger_temp # Remember to define this on platform.yaml
     name: "outdoor unit heat exchanger temperature"
     id: heat_exchanger_temp
     accuracy_decimals: 1
@@ -102,7 +101,7 @@ sensor:
           send_every: 6 #30s
 
   - platform: dallas
-    address: $dallas_address_outdoor_temp # Please remember to define this on platform.yaml
+    address: $dallas_address_outdoor_temp # Remember to define this on platform.yaml
     name: "outdoor temperature"
     id: outdoor_temp
     accuracy_decimals: 1
@@ -132,7 +131,7 @@ sensor:
             }
 
 
-# additional sensors can be added by defining new sensors - uncomment example below:
+# Additional sensors can be added by defining new sensors - uncomment example below:
 # e.g. for having another sensors to measure outdoor temperature from different place. (not used by logic)
   # - platform: dallas
   #   address: $dallas_address_test
